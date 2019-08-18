@@ -16,11 +16,11 @@ class RssScraper:
 
   def get_site_list(self):
     """
-    RSSのリストを取得する
+    本スクリプトと同じディレクトリに置かれた 'rss.json' から RSS のリストを取得する
 
     Notes
     -----
-    スクリプトと同じディレクトリに以下のような形式で RSS のリストを 'rss.json' に記述しておく
+    rss.json の形式は以下の通り
     {
       "RSS名（何でもよい）":{
         "url":"RSSへのURL",
@@ -28,6 +28,7 @@ class RssScraper:
       }
     }
 
+    Example: 
     {
       "site1":{
         "url":"https://hoge.jp/feed/atom",

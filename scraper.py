@@ -47,6 +47,8 @@ class RssScraper:
     self.dbManager.connect_db()
     sites = self.get_site_list()
     self.result = 0
+    # DB に保存されている最新のエントリの日付
+    recentUpdated = self.dbManager.get_recent_updated()
 
     for site in sites.values():
       siteTitle = site['title']
@@ -54,6 +56,10 @@ class RssScraper:
   
       feed = feedparser.parse(siteUrl)
       for entry in feed.entries:
+        # 古いエントリはスキップ
+        if entry.updated <= recentUpdated:
+          continue
+
         query = 'INSERT INTO entries (site_title, site_url, entry_title, entry_url, updated) VALUES (?, ?, ?, ?, ?)'
         self.dbManager.execute_query(
           query,
@@ -87,7 +93,26 @@ class DbManager:
     DBを切断する
     """
     self.conn.close()
-  
+
+  def get_recent_updated(self):
+    """
+    DBに保存されている最も新しい更新日付を取得する
+
+    Returns
+    -------
+    recentUpdated : str
+      DBに保存されている最も新しい更新日付
+      保存されている記事がなかった場合、空文字を返す
+    """
+    self.cursor.execute('SELECT updated FROM entries order by updated desc limit 1;')
+    result = self.cursor.fetchone()
+    # 検索結果なしのとき
+    if result == None:
+      return ""
+
+    recentUpdated = result[0]
+    return recentUpdated
+
   def execute_query(self, statement, parameters):
     """
     SQLクエリを実行する

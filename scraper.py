@@ -48,7 +48,7 @@ class RssScraper:
     sites = self.get_site_list()
     self.result = 0
     # DB に保存されている最新のエントリの日付
-    recentUpdated = self.dbManager.get_recent_updated()
+    recentUpdated = self.dbManager.search_recent_updated()
 
     for site in sites.values():
       siteTitle = site['title']
@@ -94,7 +94,7 @@ class DbManager:
     """
     self.conn.close()
 
-  def get_recent_updated(self):
+  def search_recent_updated(self):
     """
     DBに保存されている最も新しい更新日付を取得する
 

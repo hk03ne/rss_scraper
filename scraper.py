@@ -85,6 +85,15 @@ class RssScraper:
     self.dbManager.commit_db()
     self.dbManager.close_db()
 
+  def del_entries(self):
+    """
+    DBに保存されているエントリを全削除する（テスト用）
+    """
+    self.dbManager.connect_db()
+    self.dbManager.execute_query('DELETE FROM entries', '')
+    self.dbManager.commit_db()
+    #self.dbManager.close_db()
+
 class DbManager:
   def __init__(self, mode):
     """
@@ -149,7 +158,7 @@ class DbManager:
       statementのプレースホルダに代入するパラメータのタプル
     """
     self.cursor.execute(statement, parameters)
-
+  
   def commit_db(self):
     """
     DBに変更をコミットする
@@ -192,11 +201,13 @@ class TestCase:
 class TestRssScraper(TestCase):
   def setUp(self):
     self.test = RssScraper('test')
+    self.test.del_entries()
   def test_init(self):
     assert(self.test.dbManager)
+  def tearDown(self):
+    self.test.del_entries()
 
   def test_save_entries(self):
-    assert(self.test.result == 0)
     self.test.save_entries()
     assert(self.test.result > 0)
 
@@ -231,4 +242,5 @@ TestRssScraper("test_init").run()
 TestRssScraper("test_save_entries").run()
 TestRssScraper("test_save_only_new_enrty").run()
 
-RssScraper('prodution').save_entries()
+RssScraper('test').save_entries()
+RssScraper('production').save_entries()

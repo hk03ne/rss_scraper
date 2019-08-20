@@ -109,7 +109,7 @@ class DbManager:
     """
     DBに接続する
     """
-    self.conn = sqlite3.connect('test.sqlite3')
+    self.conn = sqlite3.connect(self.dbName)
     self.cursor = self.conn.cursor()
 
   def close_db(self):
@@ -149,7 +149,6 @@ class DbManager:
       statementのプレースホルダに代入するパラメータのタプル
     """
     self.cursor.execute(statement, parameters)
-    pass
 
   def commit_db(self):
     """

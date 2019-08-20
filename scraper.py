@@ -1,6 +1,7 @@
 """
 RSSからエントリを収集する
 """
+import sys
 import feedparser
 import json
 import datetime
@@ -10,8 +11,16 @@ class RssScraper:
   """
   RSSからエントリの収集を行う
   """
-  def __init__(self):
-    self.dbManager = DbManager()
+  def __init__(self, mode):
+    """
+    Parameters
+    ----------
+    mode : str
+      エントリを保存するDBのモード
+      "test"       : テスト用のDB
+      "production" : 本番環境用のDB
+    """
+    self.dbManager = DbManager(mode)
     self.result = 0
 
   def get_site_list(self):
@@ -77,7 +86,22 @@ class RssScraper:
     self.dbManager.close_db()
 
 class DbManager:
-  def __init__(self):
+  def __init__(self, mode):
+    """
+    Parameters
+    ----------
+    mode : str
+      エントリを保存するDBのモード
+      "test"       : テスト用のDB
+      "production" : 本番環境用のDB
+    """
+    if mode == 'test':
+      self.dbName = 'test.sqlite3'
+    elif mode == 'production':
+      self.dbName = 'production.sqlite3'
+    else:
+      # TODO
+      pass
     self.conn = None
     self.cursor = None
 
@@ -168,7 +192,7 @@ class TestCase:
 
 class TestRssScraper(TestCase):
   def setUp(self):
-    self.test = RssScraper()
+    self.test = RssScraper('test')
   def test_init(self):
     assert(self.test.dbManager)
 
@@ -181,7 +205,7 @@ class TestRssScraper(TestCase):
     # 新しい記事のみ取得する
     # （瞬時に二回実行しても件数が変化しければOKとする）
     self.test.save_entries()
-    dbManager = DbManager()
+    dbManager = DbManager('test')
     dbManager.connect_db()
     dbManager.cursor.execute("SELECT COUNT(*) FROM entries")
     c = dbManager.cursor.fetchone()
@@ -197,7 +221,7 @@ class TestRssScraper(TestCase):
 
 class TestDbManager(TestCase):
   def setUp(self):
-    self.test = DbManager()
+    self.test = DbManager('test')
     self.test.connect_db()
   def test_connect_db(self):
     assert(self.test.conn != None)
@@ -207,3 +231,5 @@ TestDbManager("test_connect_db").run()
 TestRssScraper("test_init").run()
 TestRssScraper("test_save_entries").run()
 TestRssScraper("test_save_only_new_enrty").run()
+
+RssScraper('prodution').save_entries()

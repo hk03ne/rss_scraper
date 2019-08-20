@@ -2,7 +2,7 @@
 [x] テーブルの作成
 [x] エントリの作成時刻、更新時刻をDBに保存する
 [x] DBに保存する
-[ ] test_save_entries
+[x] test_save_entries
 [ ] RSSの更新時刻が前回実行時より新しいときのみ処理する
 [ ] DBを正規化する
 [ ] JST, UTC の混在に対応する

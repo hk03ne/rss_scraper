@@ -69,7 +69,7 @@ class RssScraper:
         if entry.updated <= recentUpdated:
           continue
 
-        query = 'INSERT INTO entries (site_title, site_url, entry_title, entry_url, updated) VALUES (?, ?, ?, ?, ?)'
+        query = 'INSERT INTO entries (site_title, site_url, entry_title, entry_url, summary, updated) VALUES (?, ?, ?, ?, ?, ?)'
         self.dbManager.execute_query(
           query,
           (
@@ -77,6 +77,7 @@ class RssScraper:
             siteUrl, 
             entry.title, 
             entry.link, 
+            entry.summary, 
             entry.updated
           )
         )

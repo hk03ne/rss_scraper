@@ -56,13 +56,14 @@ class RssScraper:
     self.dbManager.connect_db()
     sites = self.get_site_list()
     self.result = 0
-    # DB に保存されている最新のエントリの日付
-    recentUpdated = self.dbManager.search_recent_updated()
 
     for site in sites.values():
       siteTitle = site['title']
       siteUrl   = site['url']
   
+      # DB に保存されている最新のエントリの日付
+      recentUpdated = self.dbManager.search_recent_updated(siteUrl)
+
       feed = feedparser.parse(siteUrl)
       for entry in feed.entries:
         # 古いエントリはスキップ
@@ -128,17 +129,21 @@ class DbManager:
     """
     self.conn.close()
 
-  def search_recent_updated(self):
+  def search_recent_updated(self, siteUrl):
     """
     DBに保存されている最も新しい更新日付を取得する
 
+    Parameters
+    ----------
+    siteUrl : str
+      対象サイトのURL
     Returns
     -------
     recentUpdated : str
       DBに保存されている最も新しい更新日付
       保存されている記事がなかった場合、空文字を返す
     """
-    self.cursor.execute('SELECT updated FROM entries order by updated desc limit 1;')
+    self.cursor.execute('SELECT updated FROM entries where site_url = ? order by updated desc limit 1;', (siteUrl,))
     result = self.cursor.fetchone()
     # 検索結果なしのとき
     if result == None:

@@ -13,4 +13,4 @@
 [ ] DBのモードに'test', 'production'以外の値が渡された場合の処理
 [x] サイトごとに最新日付を取得する
 [ ] サイトのRSSのURLを取得する
-[ ] rss.jsonをDB化する
+[x] rss.jsonをDB化する

@@ -23,48 +23,22 @@ class RssScraper:
     self.dbManager = DbManager(mode)
     self.result = 0
 
-  def get_site_list(self):
-    """
-    本スクリプトと同じディレクトリに置かれた 'rss.json' から RSS のリストを取得する
-
-    Notes
-    -----
-    rss.json の形式は以下の通り
-    {
-      "RSS名（何でもよい）":{
-        "url":"RSSへのURL",
-        "title":"RSSのタイトル"
-      }
-    }
-
-    Example: 
-    {
-      "site1":{
-        "url":"https://hoge.jp/feed/atom",
-        "title":"Hoge News"
-      }
-    }
-    """
-    f = open('./rss.json')
-    d = json.load(f)
-    return d
-
   def save_entries(self):
     """
     RSSのリストからエントリを取得してDBに格納する
     """
     self.dbManager.connect_db()
-    sites = self.get_site_list()
+    sites = self.dbManager.get_feed_list()
     self.result = 0
 
-    for site in sites.values():
-      siteTitle = site['title']
-      siteUrl   = site['url']
+    for site in sites:
+      siteTitle = site['siteTitle']
+      feedUrl   = site['feedUrl']
   
       # DB に保存されている最新のエントリの日付
-      recentUpdated = self.dbManager.search_recent_updated(siteUrl)
+      recentUpdated = self.dbManager.search_recent_updated(feedUrl)
 
-      feed = feedparser.parse(siteUrl)
+      feed = feedparser.parse(feedUrl)
       for entry in feed.entries:
         # 古いエントリはスキップ
         if entry.updated <= recentUpdated:
@@ -75,7 +49,7 @@ class RssScraper:
           query,
           (
             siteTitle, 
-            siteUrl, 
+            feedUrl, 
             entry.title, 
             entry.link, 
             entry.summary, 
@@ -129,13 +103,29 @@ class DbManager:
     """
     self.conn.close()
 
-  def search_recent_updated(self, siteUrl):
+  def get_feed_list(self):
+    """
+    DBからフィードのリストを取得する
+
+    Returns
+    -------
+      feeds : list
+    """
+    feeds = []
+
+    for result in self.cursor.execute('SELECT * FROM feeds;'):
+      feed = {'siteTitle':result[1], 'siteUrl':result[2], 'feedUrl':result[3]}
+      feeds.append(feed)
+
+    return feeds
+  
+  def search_recent_updated(self, feedUrl):
     """
     DBに保存されている最も新しい更新日付を取得する
 
     Parameters
     ----------
-    siteUrl : str
+    feedUrl : str
       対象サイトのURL
     Returns
     -------
@@ -143,7 +133,7 @@ class DbManager:
       DBに保存されている最も新しい更新日付
       保存されている記事がなかった場合、空文字を返す
     """
-    self.cursor.execute('SELECT updated FROM entries where site_url = ? order by updated desc limit 1;', (siteUrl,))
+    self.cursor.execute('SELECT updated FROM entries where site_url = ? order by updated desc limit 1;', (feedUrl,))
     result = self.cursor.fetchone()
     # 検索結果なしのとき
     if result == None:

@@ -6,6 +6,7 @@ import feedparser
 import json
 import datetime
 import sqlite3
+import dateutil.parser
 
 class RssScraper:
   """
@@ -40,8 +41,10 @@ class RssScraper:
 
       feed = feedparser.parse(feedUrl)
       for entry in feed.entries:
+        update = dateutil.parser.parse(entry.updated).isoformat()
+
         # 古いエントリはスキップ
-        if entry.updated <= recentUpdated:
+        if update <= recentUpdated:
           continue
 
         query = 'INSERT INTO entries (site_title, site_url, entry_title, entry_url, summary, updated) VALUES (?, ?, ?, ?, ?, ?)'
@@ -53,7 +56,7 @@ class RssScraper:
             entry.title, 
             entry.link, 
             entry.summary, 
-            entry.updated
+            update
           )
         )
         self.result = self.result + 1
@@ -139,7 +142,7 @@ class DbManager:
     if result == None:
       return ""
 
-    recentUpdated = result[0]
+    recentUpdated = dateutil.parser.parse(result[0]).isoformat()
     return recentUpdated
 
   def execute_query(self, statement, parameters):

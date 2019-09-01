@@ -1,4 +1,3 @@
 *.sqlite3
 *.sh
-rss.json
-
+*.sql

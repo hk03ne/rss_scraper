@@ -112,7 +112,8 @@ class DbManager:
 
     Returns
     -------
-      feeds : list
+    feeds : list
+      サイトのタイトル、URL、フィードのURLの辞書の配列
     """
     feeds = []
 

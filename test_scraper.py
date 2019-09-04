@@ -43,8 +43,8 @@ class TestRssScraper(TestCase):
     self.test.del_entries()
 
   def test_save_entries(self):
-    self.test.save_entries()
-    assert(self.test.result > 0)
+    count = self.test.save_entries()
+    assert(count > 0)
 
   def test_save_only_new_enrty(self):
     # 新しい記事のみ取得する

@@ -22,15 +22,19 @@ class RssScraper:
       "production" : 本番環境用のDB
     """
     self.dbManager = DbManager(mode)
-    self.result = 0
 
   def save_entries(self):
     """
     RSSのリストからエントリを取得してDBに格納する
+
+    Returns
+    -------
+    count : int
+      保存したエントリの件数
     """
     self.dbManager.connect_db()
     sites = self.dbManager.get_feed_list()
-    self.result = 0
+    count = 0
 
     for site in sites:
       siteTitle = site['siteTitle']
@@ -59,10 +63,12 @@ class RssScraper:
             update
           )
         )
-        self.result = self.result + 1
+        count = count + 1
     # 後始末
     self.dbManager.commit_db()
     self.dbManager.close_db()
+
+    return count
 
   def del_entries(self):
     """
@@ -166,5 +172,4 @@ class DbManager:
     self.conn.commit()
 
 if __name__ == '__main__':
-  print("hoge")
   RssScraper('production').save_entries()

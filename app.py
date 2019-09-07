@@ -1,4 +1,5 @@
 import sqlite3
+
 from flask import (
     Flask, 
     request, 
@@ -10,6 +11,8 @@ from flask import (
     render_template, 
     flash)
 import dateutil.parser
+
+from scraper import RssScraper
 
 # configuration
 DATABASE = 'production.sqlite3'
@@ -47,6 +50,12 @@ def index():
                 updated     = updated))
 
     return render_template('show_entries.html', entries=entries)
+
+@app.route('/update')
+def update_entries():
+    scraper = RssScraper('production')
+    scraper.save_entries()
+    return index()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

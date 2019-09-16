@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
-    {% for entry in entries %}
-    <div class="card m-2">
-        <div class="card-header text-muted">
-            {{ entry.site_title }} {{ entry.updated }}
+    <div class="container">
+        {% for entry in entries %}
+        <div class="card my-2">
+            <div class="card-body">
+                <h6 class="card-title">{{ entry.entry_title }}</h5>
+                <p><small>{{ entry.site_title }} {{ entry.updated }}</small></p>
+                <p><small class="card-text">{{ entry.summary|safe }}</small></p>
+                <a href="{{ entry.entry_url }}" class="btn btn-primary">Read more</a>
+            </div>
         </div>
-        <div class="card-body">
-            <h5 class="card-title">{{ entry.entry_title }}</h5>
-            <p class="card-text">{{ entry.summary|safe }}</p>
-            <a href="{{ entry.entry_url }}" class="btn btn-primary">Read more</a>
-        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-{% endblock %}
+    {% endblock %}

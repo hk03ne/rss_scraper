@@ -5,7 +5,7 @@
         <div class="card my-2">
             <div class="card-body">
                 <h6 class="card-title">{{ entry.entry_title }}</h5>
-                <p><small>{{ entry.site_title }} {{ entry.updated }}</small></p>
+                <p class="text-muted"><small>{{ entry.site_title }} {{ entry.updated }}</small></p>
                 <p><small class="card-text">{{ entry.summary|safe }}</small></p>
                 <a href="{{ entry.entry_url }}" class="btn btn-primary">Read more</a>
             </div>

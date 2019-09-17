@@ -1,39 +1,7 @@
 import scraper
+import unittest
 
-class TestCase:
-  """
-  テスト実行用クラス
-
-  """
-  def __init__(self, name):
-    """
-    Parameters
-    ----------
-    name : str
-      実行する関数名
-    """
-  
-    self.name = name
-  def setUp(self):
-    """
-    テストの前準備を行う
-    """
-    pass
-  def tearDown(self):
-    """
-    テストの後始末を行う
-    """
-    pass
-  def run(self):
-    """
-    テストを実行する
-    """
-    self.setUp()
-    method = getattr(self, self.name)
-    method()
-    self.tearDown()
-
-class TestRssScraper(TestCase):
+class TestRssScraper(unittest.TestCase):
   def setUp(self):
     self.test = scraper.RssScraper('test')
     self.test.del_entries()
@@ -64,7 +32,7 @@ class TestRssScraper(TestCase):
     assert(count == c[0])
     dbManager.cursor.close()
 
-class TestDbManager(TestCase):
+class TestDbManager(unittest.TestCase):
   def setUp(self):
     self.test = scraper.DbManager('test')
     self.test.connect_db()
@@ -72,8 +40,5 @@ class TestDbManager(TestCase):
     assert(self.test.conn != None)
     assert(self.test.cursor != None)
 
-TestDbManager("test_connect_db").run()
-TestRssScraper("test_init").run()
-TestRssScraper("test_save_entries").run()
-TestRssScraper("test_save_only_new_enrty").run()
-
+if __name__ == "__main__":
+    unittest.main()

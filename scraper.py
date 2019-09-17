@@ -70,15 +70,6 @@ class RssScraper:
 
     return count
 
-  def del_entries(self):
-    """
-    DBに保存されているエントリを全削除する（テスト用）
-    """
-    self.dbManager.connect_db()
-    self.dbManager.execute_query('DELETE FROM entries', '')
-    self.dbManager.commit_db()
-    #self.dbManager.close_db()
-
 class DbManager:
   def __init__(self, mode):
     """
@@ -111,6 +102,14 @@ class DbManager:
     DBを切断する
     """
     self.conn.close()
+
+  def del_entries(self):
+    """
+    DBに保存されているエントリを全削除する（テスト用）
+    """
+    self.connect_db()
+    self.execute_query('DELETE FROM entries', '')
+    self.commit_db()
 
   def get_feed_list(self):
     """

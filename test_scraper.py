@@ -4,11 +4,11 @@ import unittest
 class TestRssScraper(unittest.TestCase):
   def setUp(self):
     self.test = scraper.RssScraper('test')
-    self.test.del_entries()
+    self.test.dbManager.del_entries()
   def test_init(self):
     assert(self.test.dbManager)
   def tearDown(self):
-    self.test.del_entries()
+    self.test.dbManager.del_entries()
 
   def test_save_entries(self):
     count = self.test.save_entries()

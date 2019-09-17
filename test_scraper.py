@@ -1,5 +1,7 @@
-import scraper
 import unittest
+
+import scraper
+import dbmanager
 
 class TestRssScraper(unittest.TestCase):
   def setUp(self):
@@ -18,7 +20,7 @@ class TestRssScraper(unittest.TestCase):
     # 新しい記事のみ取得する
     # （瞬時に二回実行しても件数が変化しければOKとする）
     self.test.save_entries()
-    dbManager = scraper.DbManager('test')
+    dbManager = dbmanager.DbManager('test')
     dbManager.connect_db()
     dbManager.cursor.execute("SELECT COUNT(*) FROM entries")
     c = dbManager.cursor.fetchone()
@@ -34,7 +36,7 @@ class TestRssScraper(unittest.TestCase):
 
 class TestDbManager(unittest.TestCase):
   def setUp(self):
-    self.test = scraper.DbManager('test')
+    self.test = dbmanager.DbManager('test')
     self.test.connect_db()
   def test_connect_db(self):
     assert(self.test.conn != None)

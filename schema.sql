@@ -12,9 +12,3 @@ CREATE TABLE feeds (
     site_url    varchar(300) NOT NULL,
     feed_url    varchar(300) NOT NULL,
     PRIMARY KEY (id));
-
-INSERT INTO feeds (site_title, site_url, feed_url)
-    VALUES ('技術評論社', 'https://gihyo.jp', 'https://gihyo.jp/feed/atom');
-INSERT INTO feeds (site_title, site_url, feed_url)
-    VALUES ('Mogura VR', 'https://www.moguravr.com', 'https://www.moguravr.com/feed');
-

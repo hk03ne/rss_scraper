@@ -57,5 +57,9 @@ def update_entries():
     scraper.save_entries()
     return index()
 
+@app.route('/test')
+def show_test_page():
+    return render_template('test.html')
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

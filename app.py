@@ -1,4 +1,5 @@
-import sqlite3
+import os
+import psycopg2
 
 from flask import (
     Flask, 
@@ -15,13 +16,13 @@ import dateutil.parser
 from scraper import RssScraper
 
 # configuration
-DATABASE = 'production.sqlite3'
+DATABASE = os.environ.get('DATABASE_URL')
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
+    return psycopg2.connect(app.config['DATABASE'])
 
 @app.before_request
 def before_request():
@@ -34,10 +35,11 @@ def after_request(response):
 
 @app.route('/')
 def index():
-    cur = g.db.execute('select * from entries order by updated desc')
+    cursor = g.db.cursor()
+    cursor.execute('select * from entries order by updated desc')
 
     entries = []
-    for row in cur.fetchall():
+    for row in cursor:
         updated = dateutil.parser.parse(row[5]).strftime('%Y/%m/%d %H:%M:%S')
 
         entries.append(

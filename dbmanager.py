@@ -1,5 +1,6 @@
-import sqlite3
+import os
 import dateutil.parser
+import psycopg2
 
 def parse_date(date):
     parsedDate = dateutil.parser.parse(date).isoformat()
@@ -16,9 +17,9 @@ class DbManager:
       "production" : 本番環境用のDB
     """
     if mode == 'test':
-      self.dbName = 'test.sqlite3'
+      self.dbName = os.environ.get('DATABASE_URL2')
     elif mode == 'production':
-      self.dbName = 'production.sqlite3'
+      self.dbName = os.environ.get('DATABASE_URL')
     else:
       # TODO
       pass
@@ -29,7 +30,7 @@ class DbManager:
     """
     DBに接続する
     """
-    self.conn = sqlite3.connect(self.dbName)
+    self.conn = psycopg2.connect(self.dbName)
     self.cursor = self.conn.cursor()
 
   def close_db(self):
@@ -56,7 +57,8 @@ class DbManager:
     feeds = []
     self.connect_db()
 
-    for result in self.cursor.execute('SELECT * FROM feeds;'):
+    self.cursor.execute('SELECT * FROM feeds;')
+    for result in self.cursor:
       feed = {'siteTitle':result[1], 'siteUrl':result[2], 'feedUrl':result[3]}
       feeds.append(feed)
   
@@ -79,7 +81,7 @@ class DbManager:
       保存されている記事がなかった場合、空文字を返す
     """
     self.connect_db()
-    self.cursor.execute('SELECT updated FROM entries where site_url = ? order by updated desc limit 1;', (feedUrl,))
+    self.cursor.execute('SELECT updated FROM entries where site_url = %s order by updated desc limit 1;', (feedUrl,))
     result = self.cursor.fetchone()
     self.close_db()
 

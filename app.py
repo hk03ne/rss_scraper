@@ -63,6 +63,28 @@ def update_entries():
 def show_test_page():
     return render_template('test.html')
 
+@app.route('/search')
+def search_entries():
+    query = 'select * from entries where entry_title like \'%{}%\' or summary like \'%{}%\' order by updated desc'.format(request.args['text'], request.args['text'])
+
+    cursor = g.db.cursor()
+    cursor.execute(query)
+
+    entries = []
+    for row in cursor:
+        updated = dateutil.parser.parse(row[5]).strftime('%Y/%m/%d %H:%M:%S')
+
+        entries.append(
+            dict(
+                site_title  = row[0], 
+                site_url    = row[1], 
+                entry_title = row[2], 
+                entry_url   = row[3], 
+                summary     = row[4], 
+                updated     = updated))
+
+    return render_template('show_entries.html', entries=entries)
+
 @app.route('/feeds')
 def manage_feeds():
     cursor = g.db.cursor()

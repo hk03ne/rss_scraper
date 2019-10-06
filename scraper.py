@@ -57,7 +57,7 @@ class RssScraper:
             feedUrl, 
             entry.title, 
             entry.link, 
-            entry.summary, 
+            entry.summary[:1000], 
             update
           )
         )

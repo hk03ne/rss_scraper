@@ -3,7 +3,7 @@ CREATE TABLE entries (
     site_url    varchar(300) NOT NULL,
     entry_title varchar(300) NOT NULL,
     entry_url   varchar(300) NOT NULL,
-    summary     varchar(500) NOT NULL,
+    summary     varchar(1000) NOT NULL,
     updated     varchar(30)  NOT NULL);
 
 CREATE TABLE feeds (

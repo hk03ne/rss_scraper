@@ -63,5 +63,21 @@ def update_entries():
 def show_test_page():
     return render_template('test.html')
 
+@app.route('/feeds')
+def manage_feeds():
+    cursor = g.db.cursor()
+    cursor.execute('select * from feeds order by id')
+
+    feeds = []
+    for row in cursor:
+        feeds.append(
+            dict(
+                id          = row[0],
+                site_title  = row[1], 
+                site_url    = row[2], 
+                feed_url    = row[3]))
+
+    return render_template('feeds.html', feeds=feeds)
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

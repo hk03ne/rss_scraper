@@ -126,17 +126,7 @@ def edit_feed(post_id):
                 (request.form["id"],))
             g.db.commit()
 
-            cursor.execute('select * from feeds order by id')
-            feeds = []
-            for row in cursor:
-                feeds.append(
-                    dict(
-                        id          = row[0],
-                        site_title  = row[1], 
-                        site_url    = row[2], 
-                        feed_url    = row[3]))
-
-            return render_template('feeds.html', feeds=feeds)
+            return edit_feed()
         else:
             # TODO
             return ""

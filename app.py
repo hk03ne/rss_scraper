@@ -101,5 +101,16 @@ def manage_feeds():
 
     return render_template('feeds.html', feeds=feeds)
 
+@app.route('/feeds/add', methods=["GET", "POST"])
+def add_feeds():
+    if request.method == "GET":
+        return render_template('add_feed.html')
+    else:
+        cursor = g.db.cursor()
+        cursor.execute('insert into feeds (site_title, site_url, feed_url) values (%s, %s, %s)', 
+            (request.form["site_title"], request.form["site_url"], request.form["feed_url"]))
+        g.db.commit()
+        return manage_feeds()
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

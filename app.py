@@ -85,6 +85,62 @@ def search_entries():
 
     return render_template('show_entries.html', entries=entries)
 
+@app.route('/feeds/<int:post_id>', methods=["GET", "POST"])
+def edit_feed(post_id):
+    if request.method == "GET":
+        cursor = g.db.cursor()
+        cursor.execute('select * from feeds where id = %s', (post_id,))
+
+        feeds = []
+        for row in cursor:
+            feeds.append(
+                dict(
+                    id          = row[0],
+                    site_title  = row[1], 
+                    site_url    = row[2], 
+                    feed_url    = row[3]))
+
+        return render_template('update_feed.html', feed=feeds[0])
+    else:
+        if request.form["action"] == "update":
+            cursor = g.db.cursor()
+
+            cursor.execute('update feeds set site_title = %s, site_url = %s, feed_url = %s where id = %s',
+                (request.form["site_title"], request.form["site_url"], request.form["feed_url"], request.form["id"]))
+            g.db.commit()
+
+            cursor.execute('select * from feeds where id = %s', (post_id,))
+            feeds = []
+            for row in cursor:
+                feeds.append(
+                    dict(
+                        id          = row[0],
+                        site_title  = row[1], 
+                        site_url    = row[2], 
+                        feed_url    = row[3]))
+            return render_template('update_feed.html', feed=feeds[0])
+        elif request.form["action"] == "delete":
+            cursor = g.db.cursor()
+
+            cursor.execute('delete from feeds where id = %s',
+                (request.form["id"],))
+            g.db.commit()
+
+            cursor.execute('select * from feeds order by id')
+            feeds = []
+            for row in cursor:
+                feeds.append(
+                    dict(
+                        id          = row[0],
+                        site_title  = row[1], 
+                        site_url    = row[2], 
+                        feed_url    = row[3]))
+
+            return render_template('feeds.html', feeds=feeds)
+        else:
+            # TODO
+            return ""
+
 @app.route('/feeds')
 def manage_feeds():
     cursor = g.db.cursor()

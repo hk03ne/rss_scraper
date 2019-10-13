@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="container">
-        {% for feed in feeds %}
-        <div class="card my-2">
-            <div class="card-body">
-                <div class="float-left"><a href="{{ feed.site_url }}">{{ feed.site_title }}</a> <a href="{{ feed.feed_url }}">{{ feed.feed_url }}</a></div>
-                <div class="float-right"><a href=# class="btn btn-primary">Edit</a> <a href=# class="btn btn-danger">Delete</a></div>
-            </div>
-        </div>
-        {% endfor %}
+        <ui>
+            {% for feed in feeds %}
+            <li>
+                <a href="{{ feed.site_url }}">{{ feed.site_title }}</a> <a href="{{ feed.feed_url }}">{{ feed.feed_url }}</a>
+                <div class="float-right"><a href="/feeds/{{ feed.id }}">Edit</a></div>
+            </li>
+            {% endfor %}
+        </ui>
     </div>
 {% endblock %}

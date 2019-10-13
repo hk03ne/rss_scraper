@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="container">
+        <form method="post">
+            <input type="hidden" class="form-control" id="inputId" name="id" value="{{ feed.id }}">
+            <div class="form-group">
+                <label for="inputTitle">Title of Website</label>
+                <input type="text" class="form-control" id="inputTitle" name="site_title" value="{{ feed.site_title }}">
+            </div>
+            <div class="form-group">
+                <label for="inputSiteURL">URL of Website</label>
+                <input type="text" class="form-control" id="inputSiteURL" name="site_url" value="{{ feed.site_url }}">
+            </div>
+            <div class="form-group">
+                <label for="inputFeedURL">URL of feed</label>
+                <input type="text" class="form-control" id="inputFeedURL" name="feed_url" value="{{ feed.feed_url }}">
+            </div>
+            <button type="submit" name="action" value="update" class="btn btn-primary">Update</button>
+            <button type="submit" name="action" value="delete" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+{% endblock %}

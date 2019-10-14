@@ -1,6 +1,5 @@
 CREATE TABLE entries (
-    site_title  varchar(300) NOT NULL,
-    site_url    varchar(300) NOT NULL,
+    feed_id     integer      NOT NULL,
     entry_title varchar(300) NOT NULL,
     entry_url   varchar(300) NOT NULL,
     summary     varchar(1000) NOT NULL,
@@ -12,3 +11,14 @@ CREATE TABLE feeds (
     site_url    varchar(300) NOT NULL,
     feed_url    varchar(300) NOT NULL,
     PRIMARY KEY (id));
+
+CREATE VIEW view_entries AS
+    SELECT
+        feeds.site_title, 
+        feeds.site_url, 
+        entries.entry_title, 
+        entries.entry_url, 
+        entries.summary, 
+        entries.updated
+    FROM entries
+    INNER JOIN feeds ON entries.feed_id = feeds.id;

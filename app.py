@@ -36,7 +36,7 @@ def after_request(response):
 @app.route('/')
 def index():
     cursor = g.db.cursor()
-    cursor.execute('select * from entries order by updated desc')
+    cursor.execute('select * from view_entries order by updated desc')
 
     entries = []
     for row in cursor:
@@ -65,7 +65,7 @@ def show_test_page():
 
 @app.route('/search')
 def search_entries():
-    query = 'select * from entries where entry_title like \'%{}%\' or summary like \'%{}%\' order by updated desc'.format(request.args['text'], request.args['text'])
+    query = 'select * from view_entries where entry_title like \'%{}%\' or summary like \'%{}%\' order by updated desc'.format(request.args['text'], request.args['text'])
 
     cursor = g.db.cursor()
     cursor.execute(query)

@@ -59,21 +59,21 @@ class DbManager:
 
     self.cursor.execute('SELECT * FROM feeds;')
     for result in self.cursor:
-      feed = {'siteTitle':result[1], 'siteUrl':result[2], 'feedUrl':result[3]}
+      feed = {'id':result[0], 'siteTitle':result[1], 'siteUrl':result[2], 'feedUrl':result[3]}
       feeds.append(feed)
   
     self.close_db()
 
     return feeds
   
-  def search_recent_updated(self, feedUrl):
+  def search_recent_updated(self, id):
     """
     DBに保存されている最も新しい更新日付を取得する
 
     Parameters
     ----------
-    feedUrl : str
-      対象サイトのURL
+    id : int
+      対象サイトID
     Returns
     -------
     recentUpdated : str
@@ -81,7 +81,7 @@ class DbManager:
       保存されている記事がなかった場合、空文字を返す
     """
     self.connect_db()
-    self.cursor.execute('SELECT updated FROM entries where site_url = %s order by updated desc limit 1;', (feedUrl,))
+    self.cursor.execute('SELECT updated FROM entries where feed_id = %s order by updated desc limit 1;', (id,))
     result = self.cursor.fetchone()
     self.close_db()
 

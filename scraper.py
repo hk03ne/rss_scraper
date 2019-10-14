@@ -35,11 +35,12 @@ class RssScraper:
     count = 0
 
     for site in sites:
+      id        = site['id']
       siteTitle = site['siteTitle']
       feedUrl   = site['feedUrl']
   
       # DB に保存されている最新のエントリの日付
-      recentUpdated = self.dbManager.search_recent_updated(feedUrl)
+      recentUpdated = self.dbManager.search_recent_updated(id)
 
       feed = feedparser.parse(feedUrl)
       for entry in feed.entries:
@@ -49,12 +50,11 @@ class RssScraper:
         if update <= recentUpdated:
           continue
 
-        query = 'INSERT INTO entries (site_title, site_url, entry_title, entry_url, summary, updated) VALUES (%s, %s, %s, %s, %s, %s)'
+        query = 'INSERT INTO entries (feed_id, entry_title, entry_url, summary, updated) VALUES (%s, %s, %s, %s, %s)'
         self.dbManager.execute_query(
           query,
           (
-            siteTitle, 
-            feedUrl, 
+            id,
             entry.title, 
             entry.link, 
             entry.summary[:1000], 

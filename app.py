@@ -126,7 +126,7 @@ def edit_feed(post_id):
                 (request.form["id"],))
             g.db.commit()
 
-            return manage_feed()
+            return manage_feeds()
         else:
             # TODO
             return ""

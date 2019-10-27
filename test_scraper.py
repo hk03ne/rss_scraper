@@ -6,7 +6,12 @@ import dbmanager
 class TestRssScraper(unittest.TestCase):
   def setUp(self):
     self.test = scraper.RssScraper('test')
-    self.test.dbManager.del_entries()
+    self.test.dbManager = dbmanager.DbManager('test')
+    self.test.dbManager.connect_db()
+    self.test.dbManager.cursor.execute("DELETE FROM feeds")
+    self.test.dbManager.cursor.execute("INSERT INTO feeds (site_title, site_url, feed_url) VALUES ('昼寝ログ', 'http://hk0.hatenablog.com', 'http://hk0.hatenablog.com/rss')")
+    self.test.dbManager.commit_db()
+
   def test_init(self):
     assert(self.test.dbManager)
   def tearDown(self):

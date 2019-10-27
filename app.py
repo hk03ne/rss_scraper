@@ -4,13 +4,8 @@ import psycopg2
 from flask import (
     Flask, 
     request, 
-    session, 
     g, 
-    redirect, 
-    url_for,
-    abort, 
-    render_template, 
-    flash)
+    render_template)
 import dateutil.parser
 
 from scraper import RssScraper

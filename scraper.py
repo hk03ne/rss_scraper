@@ -61,7 +61,7 @@ class RssScraper:
             id,
             entry.title, 
             entry.link, 
-            text[:1000], 
+            text[:200] + "...", 
             update
           )
         )

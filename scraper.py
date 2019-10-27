@@ -4,6 +4,7 @@ RSSからエントリを収集する
 import sys
 import feedparser
 import dateutil.parser
+from bs4 import BeautifulSoup
 
 import dbmanager
 
@@ -50,6 +51,9 @@ class RssScraper:
         if update <= recentUpdated:
           continue
 
+        soup = BeautifulSoup(entry.summary, "html.parser")
+        text = soup.get_text()
+
         query = 'INSERT INTO entries (feed_id, entry_title, entry_url, summary, updated) VALUES (%s, %s, %s, %s, %s)'
         self.dbManager.execute_query(
           query,
@@ -57,7 +61,7 @@ class RssScraper:
             id,
             entry.title, 
             entry.link, 
-            entry.summary[:1000], 
+            text[:1000], 
             update
           )
         )

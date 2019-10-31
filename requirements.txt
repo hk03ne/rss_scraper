@@ -3,3 +3,4 @@ python-dateutil
 flask
 gunicorn
 psycopg2
+beautifulsoup4

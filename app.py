@@ -19,49 +19,8 @@ app.config.from_object(__name__)
 def connect_db():
     return psycopg2.connect(app.config['DATABASE'])
 
-@app.before_request
-def before_request():
-    g.db = connect_db()
-
-@app.after_request
-def after_request(response):
-    g.db.close()
-    return response
-
-@app.route('/')
-def index():
-    cursor = g.db.cursor()
-    cursor.execute('select * from view_entries order by updated desc')
-
-    entries = []
-    for row in cursor:
-        updated = dateutil.parser.parse(row[5]).strftime('%Y/%m/%d %H:%M:%S')
-
-        entries.append(
-            dict(
-                site_title  = row[0], 
-                site_url    = row[1], 
-                entry_title = row[2], 
-                entry_url   = row[3], 
-                summary     = row[4], 
-                updated     = updated))
-
-    return render_template('show_entries.html', entries=entries)
-
-@app.route('/update')
-def update_entries():
-    scraper = RssScraper('production')
-    scraper.save_entries()
-    return index()
-
-@app.route('/test')
-def show_test_page():
-    return render_template('test.html')
-
-@app.route('/search')
-def search_entries():
-    query = 'select * from view_entries where entry_title like \'%{}%\' or summary like \'%{}%\' order by updated desc'.format(request.args['text'], request.args['text'])
-
+def select_entries(where=''):
+    query = 'select * from view_entries ' + where + ' order by updated desc'
     cursor = g.db.cursor()
     cursor.execute(query)
 
@@ -78,22 +37,62 @@ def search_entries():
                 summary     = row[4], 
                 updated     = updated))
 
+    return entries
+
+def select_feeds(where=''):
+    query = 'select * from feeds ' + where +  ' order by id'
+
+    cursor = g.db.cursor()
+    cursor.execute(query)
+
+    feeds = []
+    for row in cursor:
+        feeds.append(
+            dict(
+                id          = row[0],
+                site_title  = row[1], 
+                site_url    = row[2], 
+                feed_url    = row[3]))
+
+    return feeds
+
+@app.before_request
+def before_request():
+    g.db = connect_db()
+
+@app.after_request
+def after_request(response):
+    g.db.close()
+    return response
+
+@app.route('/')
+def index():
+    entries = select_entries()
+
+    return render_template('show_entries.html', entries=entries)
+
+@app.route('/update')
+def update_entries():
+    scraper = RssScraper('production')
+    scraper.save_entries()
+    return index()
+
+@app.route('/test')
+def show_test_page():
+    return render_template('test.html')
+
+@app.route('/search')
+def search_entries():
+    where = 'where entry_title like \'%{}%\' or summary like \'%{}%\''.format(request.args['text'], request.args['text'])
+
+    entries = select_entries(where)
+
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/feeds/<int:post_id>', methods=["GET", "POST"])
 def edit_feed(post_id):
     if request.method == "GET":
-        cursor = g.db.cursor()
-        cursor.execute('select * from feeds where id = %s', (post_id,))
-
-        feeds = []
-        for row in cursor:
-            feeds.append(
-                dict(
-                    id          = row[0],
-                    site_title  = row[1], 
-                    site_url    = row[2], 
-                    feed_url    = row[3]))
+        feeds = select_feeds('where id = {}'.format(post_id))
 
         return render_template('update_feed.html', feed=feeds[0])
     else:
@@ -104,15 +103,8 @@ def edit_feed(post_id):
                 (request.form["site_title"], request.form["site_url"], request.form["feed_url"], request.form["id"]))
             g.db.commit()
 
-            cursor.execute('select * from feeds where id = %s', (post_id,))
-            feeds = []
-            for row in cursor:
-                feeds.append(
-                    dict(
-                        id          = row[0],
-                        site_title  = row[1], 
-                        site_url    = row[2], 
-                        feed_url    = row[3]))
+            feeds = select_feeds('where id = {}'.format(post_id))
+
             return render_template('update_feed.html', feed=feeds[0])
         elif request.form["action"] == "delete":
             cursor = g.db.cursor()
@@ -128,17 +120,7 @@ def edit_feed(post_id):
 
 @app.route('/feeds')
 def manage_feeds():
-    cursor = g.db.cursor()
-    cursor.execute('select * from feeds order by id')
-
-    feeds = []
-    for row in cursor:
-        feeds.append(
-            dict(
-                id          = row[0],
-                site_title  = row[1], 
-                site_url    = row[2], 
-                feed_url    = row[3]))
+    feeds = select_feeds()
 
     return render_template('feeds.html', feeds=feeds)
 

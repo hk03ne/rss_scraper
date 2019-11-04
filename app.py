@@ -131,22 +131,26 @@ def after_request(response):
     return response
 
 @app.route('/')
+@flask_login.login_required
 def index():
     entries = select_entries()
 
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/update')
+@flask_login.login_required
 def update_entries():
     scraper = RssScraper('production')
     scraper.save_entries()
     return redirect(url_for('index'))
 
 @app.route('/test')
+@flask_login.login_required
 def show_test_page():
     return render_template('test.html')
 
 @app.route('/search')
+@flask_login.login_required
 def search_entries():
     where = 'where entry_title like \'%{}%\' or summary like \'%{}%\''.format(request.args['text'], request.args['text'])
 

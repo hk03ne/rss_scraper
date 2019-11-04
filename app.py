@@ -59,7 +59,7 @@ def protected():
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
-    return 'Logged out'
+    return redirect(url_for('login'))
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():

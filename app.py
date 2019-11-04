@@ -1,4 +1,5 @@
 import os
+from hashlib import sha256
 import psycopg2
 
 from flask import (
@@ -25,22 +26,30 @@ login_manager.init_app(app)
 
 app.config.from_object(__name__)
 
-users = {'hk': {'password': 'secret'}}
+users = {'hk': {'password_digest': '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b'}}
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return render_template('login.html')
 
+    if request.form['email'] == '' or request.form['password'] == '':
+        return 'Input email and password.'
+
+    if request.form['email'] not in users:
+        return 'Incorrect email or password.'
+
+    hash = sha256(request.form['password'].encode()).hexdigest()
+
     email = request.form['email']
 
-    if request.form['password'] == users[email]['password']:
+    if hash == users[email]['password_digest']:
         user = User()
         user.id = email
         flask_login.login_user(user)
         return redirect(url_for('index'))
 
-    return 'Bad login'
+    return 'Incorrect email or password.'
 
 @app.route('/protected')
 @flask_login.login_required
@@ -75,9 +84,9 @@ def request_loader(request):
     user = User()
     user.id = email
 
-    # DO NOT ever store passwords in plaintext and always compare password
-    # hashes using constant-time comparison!
-    user.is_authenticated = request.form['password'] == users[email]['password']
+    hash = sha256(request.form['password'].encode()).hexdigest()
+
+    user.is_authenticated = hash == users[email]['password_digest']
 
     return user
 

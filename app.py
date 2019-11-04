@@ -16,7 +16,7 @@ from user import User
 
 # configuration
 DATABASE = os.environ.get('DATABASE_URL')
-SECRET_KEY = 'f31-Ad#w'
+SECRET_KEY = os.urandom(16)
 
 app = Flask(__name__)
 

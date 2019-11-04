@@ -12,6 +12,11 @@ CREATE TABLE feeds (
     feed_url    varchar(300) NOT NULL,
     PRIMARY KEY (id));
 
+CREATE TABLE users (
+    id              varchar(100) NOT NULL,
+    password_digest varchar(100) NOT NULL,
+    PRIMARY KEY (id));
+
 CREATE VIEW view_entries AS
     SELECT
         feeds.site_title, 

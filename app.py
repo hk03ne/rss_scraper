@@ -26,7 +26,23 @@ login_manager.init_app(app)
 
 app.config.from_object(__name__)
 
-users = {'hk': {'password_digest': '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b'}}
+def get_user(id):
+    query = 'select * from users where id = \'{}\''.format(id)
+
+    cursor = g.db.cursor()
+    cursor.execute(query)
+
+    users = []
+    for row in cursor:
+        users.append(
+            dict(
+                id              = row[0],
+                password_digest = row[1]))
+
+    if users == []:
+        return None
+
+    return users[0]
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -36,14 +52,15 @@ def login():
     if request.form['email'] == '' or request.form['password'] == '':
         return 'Input email and password.'
 
-    if request.form['email'] not in users:
-        return 'Incorrect email or password.'
+    user = get_user(request.form['email'])
+    if user == None:
+       return 'Incorrect email or password.'
 
     hash = sha256(request.form['password'].encode()).hexdigest()
 
     email = request.form['email']
 
-    if hash == users[email]['password_digest']:
+    if hash == user['password_digest']:
         user = User()
         user.id = email
         flask_login.login_user(user)
@@ -66,28 +83,9 @@ def unauthorized_handler():
     return redirect(url_for('login'))
 
 @login_manager.user_loader
-def user_loader(email):
-    if email not in users:
-        return
-
+def user_loader(id):
     user = User()
-    user.id = email
-    return user
-
-
-@login_manager.request_loader
-def request_loader(request):
-    email = request.form.get('email')
-    if email not in users:
-        return
-
-    user = User()
-    user.id = email
-
-    hash = sha256(request.form['password'].encode()).hexdigest()
-
-    user.is_authenticated = hash == users[email]['password_digest']
-
+    user.id = id
     return user
 
 def connect_db():

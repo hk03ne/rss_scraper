@@ -1,20 +1,92 @@
 import os
+from hashlib import sha256
 import psycopg2
 
 from flask import (
     Flask, 
     request, 
+    redirect,
+    url_for,
     g, 
     render_template)
 import dateutil.parser
+import flask_login
 
 from scraper import RssScraper
+from user import User
 
 # configuration
 DATABASE = os.environ.get('DATABASE_URL')
+SECRET_KEY = os.urandom(16)
 
 app = Flask(__name__)
+
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+
 app.config.from_object(__name__)
+
+def get_user(id):
+    query = 'select * from users where id = \'{}\''.format(id)
+
+    cursor = g.db.cursor()
+    cursor.execute(query)
+
+    users = []
+    for row in cursor:
+        users.append(
+            dict(
+                id              = row[0],
+                password_digest = row[1]))
+
+    if users == []:
+        return None
+
+    return users[0]
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    if request.form['email'] == '' or request.form['password'] == '':
+        return 'Input email and password.'
+
+    user = get_user(request.form['email'])
+    if user == None:
+       return 'Incorrect email or password.'
+
+    hash = sha256(request.form['password'].encode()).hexdigest()
+
+    email = request.form['email']
+
+    if hash == user['password_digest']:
+        user = User()
+        user.id = email
+        flask_login.login_user(user)
+        return redirect(url_for('index'))
+
+    return 'Incorrect email or password.'
+
+@app.route('/protected')
+@flask_login.login_required
+def protected():
+    return 'Logged in as: ' + flask_login.current_user.id
+
+@app.route('/logout')
+def logout():
+    flask_login.logout_user()
+    return redirect(url_for('login'))
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return redirect(url_for('login'))
+
+@login_manager.user_loader
+def user_loader(id):
+    user = User()
+    user.id = id
+    return user
 
 def connect_db():
     return psycopg2.connect(app.config['DATABASE'])
@@ -66,22 +138,26 @@ def after_request(response):
     return response
 
 @app.route('/')
+@flask_login.login_required
 def index():
     entries = select_entries()
 
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/update')
+@flask_login.login_required
 def update_entries():
     scraper = RssScraper('production')
     scraper.save_entries()
-    return index()
+    return redirect(url_for('index'))
 
 @app.route('/test')
+@flask_login.login_required
 def show_test_page():
     return render_template('test.html')
 
 @app.route('/search')
+@flask_login.login_required
 def search_entries():
     where = 'where entry_title like \'%{}%\' or summary like \'%{}%\''.format(request.args['text'], request.args['text'])
 
@@ -90,6 +166,7 @@ def search_entries():
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/feeds/<int:post_id>', methods=["GET", "POST"])
+@flask_login.login_required
 def edit_feed(post_id):
     if request.method == "GET":
         feeds = select_feeds('where id = {}'.format(post_id))
@@ -119,12 +196,14 @@ def edit_feed(post_id):
             return ""
 
 @app.route('/feeds')
+@flask_login.login_required
 def manage_feeds():
     feeds = select_feeds()
 
     return render_template('feeds.html', feeds=feeds)
 
 @app.route('/feeds/add', methods=["GET", "POST"])
+@flask_login.login_required
 def add_feeds():
     if request.method == "GET":
         return render_template('add_feed.html')

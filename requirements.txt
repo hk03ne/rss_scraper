@@ -4,3 +4,4 @@ flask
 gunicorn
 psycopg2
 beautifulsoup4
+flask-login

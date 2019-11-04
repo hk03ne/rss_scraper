@@ -2,6 +2,7 @@
 RSSからエントリを収集する
 """
 import sys
+import html
 import feedparser
 import dateutil.parser
 from bs4 import BeautifulSoup
@@ -52,7 +53,7 @@ class RssScraper:
           continue
 
         soup = BeautifulSoup(entry.summary, "html.parser")
-        text = soup.get_text()
+        text = html.escape(soup.get_text())
 
         query = 'INSERT INTO entries (feed_id, entry_title, entry_url, summary, updated) VALUES (%s, %s, %s, %s, %s)'
         self.dbManager.execute_query(

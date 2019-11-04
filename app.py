@@ -38,7 +38,7 @@ def login():
         user = User()
         user.id = email
         flask_login.login_user(user)
-        return redirect(url_for('protected'))
+        return redirect(url_for('index'))
 
     return 'Bad login'
 
@@ -140,7 +140,7 @@ def index():
 def update_entries():
     scraper = RssScraper('production')
     scraper.save_entries()
-    return index()
+    return redirect(url_for('index'))
 
 @app.route('/test')
 def show_test_page():

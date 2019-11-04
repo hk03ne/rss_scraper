@@ -4,17 +4,82 @@ import psycopg2
 from flask import (
     Flask, 
     request, 
+    redirect,
+    url_for,
     g, 
     render_template)
 import dateutil.parser
+import flask_login
 
 from scraper import RssScraper
+from user import User
 
 # configuration
 DATABASE = os.environ.get('DATABASE_URL')
+SECRET_KEY = 'f31-Ad#w'
 
 app = Flask(__name__)
+
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+
 app.config.from_object(__name__)
+
+users = {'hk': {'password': 'secret'}}
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    email = request.form['email']
+
+    if request.form['password'] == users[email]['password']:
+        user = User()
+        user.id = email
+        flask_login.login_user(user)
+        return redirect(url_for('protected'))
+
+    return 'Bad login'
+
+@app.route('/protected')
+@flask_login.login_required
+def protected():
+    return 'Logged in as: ' + flask_login.current_user.id
+
+@app.route('/logout')
+def logout():
+    flask_login.logout_user()
+    return 'Logged out'
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return redirect(url_for('login'))
+
+@login_manager.user_loader
+def user_loader(email):
+    if email not in users:
+        return
+
+    user = User()
+    user.id = email
+    return user
+
+
+@login_manager.request_loader
+def request_loader(request):
+    email = request.form.get('email')
+    if email not in users:
+        return
+
+    user = User()
+    user.id = email
+
+    # DO NOT ever store passwords in plaintext and always compare password
+    # hashes using constant-time comparison!
+    user.is_authenticated = request.form['password'] == users[email]['password']
+
+    return user
 
 def connect_db():
     return psycopg2.connect(app.config['DATABASE'])
@@ -90,6 +155,7 @@ def search_entries():
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/feeds/<int:post_id>', methods=["GET", "POST"])
+@flask_login.login_required
 def edit_feed(post_id):
     if request.method == "GET":
         feeds = select_feeds('where id = {}'.format(post_id))
@@ -119,12 +185,14 @@ def edit_feed(post_id):
             return ""
 
 @app.route('/feeds')
+@flask_login.login_required
 def manage_feeds():
     feeds = select_feeds()
 
     return render_template('feeds.html', feeds=feeds)
 
 @app.route('/feeds/add', methods=["GET", "POST"])
+@flask_login.login_required
 def add_feeds():
     if request.method == "GET":
         return render_template('add_feed.html')

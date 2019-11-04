@@ -1,7 +1,5 @@
 import os
 from hashlib import sha256
-from logging import getLogger
-
 import psycopg2
 
 from flask import (
@@ -20,8 +18,6 @@ from user import User
 # configuration
 DATABASE = os.environ.get('DATABASE_URL')
 SECRET_KEY = os.urandom(16)
-
-logger = getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -88,25 +84,8 @@ def unauthorized_handler():
 
 @login_manager.user_loader
 def user_loader(id):
-    logger.error('user_loader ' + str(id))
     user = User()
     user.id = id
-    return user
-
-@login_manager.request_loader
-def request_loader(request):
-    email = request.form.get('email')
-    logger.error('request_loader ' + str(email))
-    user_info = get_user(email)
-    if user_info == None:
-       return
-
-    user = User()
-    user.id = email
-
-    hash = sha256(request.form.get('password').encode()).hexdigest()
-    user.is_authenticated = hash == user_info['password_digest']
-
     return user
 
 def connect_db():

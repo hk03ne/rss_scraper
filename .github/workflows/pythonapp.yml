@@ -14,7 +14,8 @@ jobs:
           - 5432:5432
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: POSTGRES
+          POSTGRES_DBNAME: testdb 
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
@@ -29,12 +30,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Setup Database
-      run: echo Setup Database
+      run: |
+        psql --dbname=testdb < schema.sql
+        echo "\dt" | psql --dbname=testdb
       env:
-        RAILS_ENV: test
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        DATABASE_URL2: "postgres://postgres:postgres@localhost:5432/postgres"
+        DATABASE_URL2: "postgres://postgres:POSTGRES@localhost:5432/testdb"
     - name: Lint with flake8
       run: |
         pip install flake8
@@ -45,4 +45,5 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
+        echo $DATABASE_URL2
         # pytest

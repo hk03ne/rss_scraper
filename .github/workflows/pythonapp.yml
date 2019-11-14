@@ -26,16 +26,14 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee -a /etc/apt/sources.list.d/pgdg.list
-        curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-        sudo apt install postgresql-11
         sudo apt-get install libpq-dev
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Setup Database
       run: |
-        psql --dbname=testdb < schema.sql
-        echo "\dt" | psql --dbname=testdb
+        # psql --dbname=testdb < schema.sql
+        # echo "\dt" | psql --dbname=testdb
+        echo Setup Database
       env:
         DATABASE_URL2: "postgres://postgres:POSTGRES@localhost:5432/testdb"
     - name: Lint with flake8

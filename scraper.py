@@ -59,13 +59,11 @@ class RssScraper:
 
                 self.dbManager.execute_query(
                     query,
-                    (
-                        id,
-                        entry.title,
-                        entry.link,
-                        text[:200] + "...",
-                        update
-                    )
+                    id,
+                    entry.title,
+                    entry.link,
+                    text[:200] + "...",
+                    update
                 )
                 count = count + 1
 

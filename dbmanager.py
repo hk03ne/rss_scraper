@@ -45,7 +45,7 @@ class DbManager:
         """
         DBに保存されているエントリを全削除する（テスト用）
         """
-        self.execute_query('DELETE FROM entries', '')
+        self.execute_query('DELETE FROM entries')
 
     def get_feed_list(self):
         """
@@ -101,7 +101,7 @@ class DbManager:
         recentUpdated = parse_date(result[0])
         return recentUpdated
 
-    def execute_query(self, statement, parameters):
+    def execute_query(self, statement, *parameters):
         """
         SQLクエリを実行する
 

@@ -3,11 +3,11 @@ from hashlib import sha256
 import psycopg2
 
 from flask import (
-    Flask, 
-    request, 
+    Flask,
+    request,
     redirect,
     url_for,
-    g, 
+    g,
     render_template)
 import dateutil.parser
 import flask_login
@@ -26,6 +26,7 @@ login_manager.init_app(app)
 
 app.config.from_object(__name__)
 
+
 def get_user(id):
     query = 'select * from users where id = \'{}\''.format(id)
 
@@ -36,13 +37,14 @@ def get_user(id):
     for row in cursor:
         users.append(
             dict(
-                id              = row[0],
-                password_digest = row[1]))
+                id=row[0],
+                password_digest=row[1]))
 
     if users == []:
         return None
 
     return users[0]
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -53,8 +55,8 @@ def login():
         return 'Input email and password.'
 
     user = get_user(request.form['email'])
-    if user == None:
-       return 'Incorrect email or password.'
+    if user is None:
+        return 'Incorrect email or password.'
 
     hash = sha256(request.form['password'].encode()).hexdigest()
 
@@ -68,19 +70,23 @@ def login():
 
     return 'Incorrect email or password.'
 
+
 @app.route('/protected')
 @flask_login.login_required
 def protected():
     return 'Logged in as: ' + flask_login.current_user.id
+
 
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
     return redirect(url_for('login'))
 
+
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return redirect(url_for('login'))
+
 
 @login_manager.user_loader
 def user_loader(id):
@@ -88,8 +94,10 @@ def user_loader(id):
     user.id = id
     return user
 
+
 def connect_db():
     return psycopg2.connect(app.config['DATABASE'])
+
 
 def select_entries(where=''):
     query = 'select * from view_entries ' + where + ' order by updated desc'
@@ -102,17 +110,18 @@ def select_entries(where=''):
 
         entries.append(
             dict(
-                site_title  = row[0], 
-                site_url    = row[1], 
-                entry_title = row[2], 
-                entry_url   = row[3], 
-                summary     = row[4], 
-                updated     = updated))
+                site_title=row[0],
+                site_url=row[1],
+                entry_title=row[2],
+                entry_url=row[3],
+                summary=row[4],
+                updated=updated))
 
     return entries
 
+
 def select_feeds(where=''):
-    query = 'select * from feeds ' + where +  ' order by id'
+    query = 'select * from feeds ' + where + ' order by id'
 
     cursor = g.db.cursor()
     cursor.execute(query)
@@ -121,21 +130,24 @@ def select_feeds(where=''):
     for row in cursor:
         feeds.append(
             dict(
-                id          = row[0],
-                site_title  = row[1], 
-                site_url    = row[2], 
-                feed_url    = row[3]))
+                id=row[0],
+                site_title=row[1],
+                site_url=row[2],
+                feed_url=row[3]))
 
     return feeds
+
 
 @app.before_request
 def before_request():
     g.db = connect_db()
 
+
 @app.after_request
 def after_request(response):
     g.db.close()
     return response
+
 
 @app.route('/')
 @flask_login.login_required
@@ -144,6 +156,7 @@ def index():
 
     return render_template('show_entries.html', entries=entries)
 
+
 @app.route('/update')
 @flask_login.login_required
 def update_entries():
@@ -151,19 +164,23 @@ def update_entries():
     scraper.save_entries()
     return redirect(url_for('index'))
 
+
 @app.route('/test')
 @flask_login.login_required
 def show_test_page():
     return render_template('test.html')
 
+
 @app.route('/search')
 @flask_login.login_required
 def search_entries():
-    where = 'where entry_title like \'%{}%\' or summary like \'%{}%\''.format(request.args['text'], request.args['text'])
+    where = 'where entry_title like \'%{}%\' or summary like \'%{}%\''.format(
+        request.args['text'], request.args['text'])
 
     entries = select_entries(where)
 
     return render_template('show_entries.html', entries=entries)
+
 
 @app.route('/feeds/<int:post_id>', methods=["GET", "POST"])
 @flask_login.login_required
@@ -176,8 +193,12 @@ def edit_feed(post_id):
         if request.form["action"] == "update":
             cursor = g.db.cursor()
 
-            cursor.execute('update feeds set site_title = %s, site_url = %s, feed_url = %s where id = %s',
-                (request.form["site_title"], request.form["site_url"], request.form["feed_url"], request.form["id"]))
+            cursor.execute('update feeds set site_title = %s, '
+                           'site_url = %s, feed_url = %s where id = %s',
+                           (request.form["site_title"],
+                            request.form["site_url"],
+                            request.form["feed_url"],
+                            request.form["id"]))
             g.db.commit()
 
             feeds = select_feeds('where id = {}'.format(post_id))
@@ -187,13 +208,14 @@ def edit_feed(post_id):
             cursor = g.db.cursor()
 
             cursor.execute('delete from feeds where id = %s',
-                (request.form["id"],))
+                           (request.form["id"],))
             g.db.commit()
 
             return manage_feeds()
         else:
             # TODO
             return ""
+
 
 @app.route('/feeds')
 @flask_login.login_required
@@ -202,6 +224,7 @@ def manage_feeds():
 
     return render_template('feeds.html', feeds=feeds)
 
+
 @app.route('/feeds/add', methods=["GET", "POST"])
 @flask_login.login_required
 def add_feeds():
@@ -209,10 +232,15 @@ def add_feeds():
         return render_template('add_feed.html')
     else:
         cursor = g.db.cursor()
-        cursor.execute('insert into feeds (site_title, site_url, feed_url) values (%s, %s, %s)', 
-            (request.form["site_title"], request.form["site_url"], request.form["feed_url"]))
+        cursor.execute(
+            'insert into feeds (site_title, site_url, feed_url) '
+            'values (%s, %s, %s)',
+            (request.form["site_title"],
+             request.form["site_url"],
+             request.form["feed_url"]))
         g.db.commit()
         return manage_feeds()
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

@@ -36,11 +36,12 @@ class RssScraper:
         count = 0
 
         for site in sites:
-            id = site['id']
+            feedId = site['id']
+            userId = site['user_id']
             feedUrl = site['feedUrl']
 
             # DB に保存されている最新のエントリの日付
-            recentUpdated = self.dbManager.search_recent_updated(id)
+            recentUpdated = self.dbManager.search_recent_updated(feedId, userId)
 
             feed = feedparser.parse(feedUrl)
             for entry in feed.entries:
@@ -54,12 +55,13 @@ class RssScraper:
                 text = html.escape(soup.get_text())
 
                 query = 'INSERT INTO entries '\
-                        '(feed_id, entry_title, entry_url, summary, updated) '\
-                        'VALUES (%s, %s, %s, %s, %s)'
+                        '(feed_id, user_id, entry_title, entry_url, summary, updated) '\
+                        'VALUES (%s, %s, %s, %s, %s, %s)'
 
                 self.dbManager.execute_query(
                     query,
-                    id,
+                    feedId,
+                    userId,
                     entry.title,
                     entry.link,
                     text[:200] + "...",

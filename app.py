@@ -27,8 +27,8 @@ login_manager.init_app(app)
 app.config.from_object(__name__)
 
 
-def get_user(id):
-    query = 'select * from users where id = \'{}\''.format(id)
+def get_user(mail):
+    query = 'select * from users where mail = \'{}\''.format(mail)
 
     cursor = g.db.cursor()
     cursor.execute(query)
@@ -60,11 +60,11 @@ def login():
 
     hash = sha256(request.form['password'].encode()).hexdigest()
 
-    email = request.form['email']
+    id = user['id']
 
     if hash == user['password_digest']:
         user = User()
-        user.id = email
+        user.id = id
         flask_login.login_user(user)
         return redirect(url_for('index'))
 
@@ -106,15 +106,15 @@ def select_entries(where=''):
 
     entries = []
     for row in cursor:
-        updated = dateutil.parser.parse(row[5]).strftime('%Y/%m/%d %H:%M:%S')
+        updated = dateutil.parser.parse(row[6]).strftime('%Y/%m/%d %H:%M:%S')
 
         entries.append(
             dict(
-                site_title=row[0],
-                site_url=row[1],
-                entry_title=row[2],
-                entry_url=row[3],
-                summary=row[4],
+                site_title=row[1],
+                site_url=row[2],
+                entry_title=row[3],
+                entry_url=row[4],
+                summary=row[5],
                 updated=updated))
 
     return entries
@@ -122,7 +122,7 @@ def select_entries(where=''):
 
 def select_feeds(where=''):
     query = 'select * from feeds ' + where + ' order by id'
-
+    print(query)
     cursor = g.db.cursor()
     cursor.execute(query)
 
@@ -131,9 +131,9 @@ def select_feeds(where=''):
         feeds.append(
             dict(
                 id=row[0],
-                site_title=row[1],
-                site_url=row[2],
-                feed_url=row[3]))
+                site_title=row[2],
+                site_url=row[3],
+                feed_url=row[4]))
 
     return feeds
 
@@ -152,7 +152,7 @@ def after_request(response):
 @app.route('/')
 @flask_login.login_required
 def index():
-    entries = select_entries()
+    entries = select_entries('where user_id = {}'.format(flask_login.current_user.id))
 
     return render_template('show_entries.html', entries=entries)
 
@@ -174,8 +174,8 @@ def show_test_page():
 @app.route('/search')
 @flask_login.login_required
 def search_entries():
-    where = 'where entry_title like \'%{}%\' or summary like \'%{}%\''.format(
-        request.args['text'], request.args['text'])
+    where = 'where user_id = {} and entry_title like \'%{}%\' or summary like \'%{}%\''.format(
+        flask_login.current_user.id, request.args['text'], request.args['text'])
 
     entries = select_entries(where)
 
@@ -186,7 +186,7 @@ def search_entries():
 @flask_login.login_required
 def edit_feed(post_id):
     if request.method == "GET":
-        feeds = select_feeds('where id = {}'.format(post_id))
+        feeds = select_feeds('where user_id = {} and id = {}'.format(flask_login.current_user.id, post_id))
 
         return render_template('update_feed.html', feed=feeds[0])
     else:
@@ -201,14 +201,16 @@ def edit_feed(post_id):
                             request.form["id"]))
             g.db.commit()
 
-            feeds = select_feeds('where id = {}'.format(post_id))
+            feeds = select_feeds('where user_id = {} and id = {}'.format(flask_login.current_user.id, post_id))
 
             return render_template('update_feed.html', feed=feeds[0])
         elif request.form["action"] == "delete":
             cursor = g.db.cursor()
 
-            cursor.execute('delete from feeds where id = %s',
-                           (request.form["id"],))
+            cursor.execute('delete from entries where user_id = %s and feed_id = %s',
+                           (flask_login.current_user.id, request.form["id"],))
+            cursor.execute('delete from feeds where user_id = %s and id = %s',
+                           (flask_login.current_user.id, request.form["id"],))
             g.db.commit()
 
             return manage_feeds()
@@ -220,7 +222,7 @@ def edit_feed(post_id):
 @app.route('/feeds')
 @flask_login.login_required
 def manage_feeds():
-    feeds = select_feeds()
+    feeds = select_feeds('where user_id = {}'.format(flask_login.current_user.id))
 
     return render_template('feeds.html', feeds=feeds)
 
@@ -233,9 +235,10 @@ def add_feeds():
     else:
         cursor = g.db.cursor()
         cursor.execute(
-            'insert into feeds (site_title, site_url, feed_url) '
-            'values (%s, %s, %s)',
-            (request.form["site_title"],
+            'insert into feeds (user_id, site_title, site_url, feed_url) '
+            'values (%s, %s, %s, %s)',
+            (flask_login.current_user.id,
+             request.form["site_title"],
              request.form["site_url"],
              request.form["feed_url"]))
         g.db.commit()

@@ -5,3 +5,8 @@ init:
 test:
 	python3 test_scraper.py
 	
+reinit:
+	psql --dbname=productiondb < scripts/drop.sql
+	psql --dbname=testdb < scripts/drop.sql
+	psql --dbname=productiondb < schema.sql
+	psql --dbname=testdb < schema.sql

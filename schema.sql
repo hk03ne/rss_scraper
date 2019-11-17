@@ -14,6 +14,7 @@ CREATE TABLE feeds (
 
 CREATE TABLE users (
     id              varchar(100) NOT NULL,
+    mail            varchar(100) NOT NULL,
     password_digest varchar(100) NOT NULL,
     PRIMARY KEY (id));
 

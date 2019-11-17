@@ -38,7 +38,7 @@ def get_user(id):
         users.append(
             dict(
                 id=row[0],
-                password_digest=row[1]))
+                password_digest=row[2]))
 
     if users == []:
         return None

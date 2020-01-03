@@ -1,0 +1,12 @@
+version: '3'
+services:
+  my-db:
+    build: .
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d

@@ -3,7 +3,7 @@ init:
 	psql --dbname=testdb < schema.sql
 	psql --dbname=productiondb < schema.sql
 test:
-	python3 test_scraper.py
+	python3 -m unittest discover
 	
 reinit:
 	psql --dbname=productiondb < scripts/drop.sql

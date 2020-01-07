@@ -1,5 +1,5 @@
 *.sqlite3
-__pycache__/*
+__pycache__
 tool/*
 scripts/backup.sql
 scripts/insert_users.sql

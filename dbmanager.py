@@ -41,12 +41,6 @@ class DbManager:
         """
         self.conn.close()
 
-    def del_entries(self):
-        """
-        DBに保存されているエントリを全削除する（テスト用）
-        """
-        self.execute_query('DELETE FROM entries')
-
     def get_feed_list(self):
         """
         DBからフィードのリストを取得する

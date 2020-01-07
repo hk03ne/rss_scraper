@@ -6,53 +6,47 @@ import dbmanager
 
 class TestRssScraper(unittest.TestCase):
     def setUp(self):
-        self.test = scraper.RssScraper('test')
-        self.test.dbManager = dbmanager.DbManager('test')
-        self.test.dbManager.connect_db()
-        self.test.dbManager.cursor.execute("DELETE FROM feeds")
-        self.test.dbManager.cursor.execute(
-            "INSERT INTO feeds (site_title, site_url, feed_url) "
-            "VALUES ('昼寝ログ', 'http://hk0.hatenablog.com', "
-            "'http://hk0.hatenablog.com/rss')")
-        self.test.dbManager.commit_db()
-
-    def test_init(self):
-        assert(self.test.dbManager)
+        pass
 
     def tearDown(self):
-        self.test.dbManager.del_entries()
+        pass
 
     def test_save_entries(self):
-        count = self.test.save_entries()
-        assert(count > 0)
+        sc = scraper.RssScraper('test')
+        db = sc.dbManager
 
-    def test_save_only_new_enrty(self):
-        # 新しい記事のみ取得する
-        # （瞬時に二回実行しても件数が変化しければOKとする）
-        self.test.save_entries()
-        dbManager = dbmanager.DbManager('test')
-        dbManager.connect_db()
-        dbManager.cursor.execute("SELECT COUNT(*) FROM entries")
-        c = dbManager.cursor.fetchone()
+        db.execute_query('DELETE FROM entries;')
+        db.execute_query('DELETE FROM feeds;')
+        db.execute_query('INSERT INTO feeds (id, user_id, site_title, site_url, feed_url) VALUES (9, 99, \'Wikipedia featured articles\', \'https://en.wikipedia.org/w/api.php\', \'http://en.wikipedia.org/w/api.php?action=featuredfeed&feed=featured&feedformat=atom\');')
 
-        # 実行前の件数
-        count = c[0]
+        sc.save_entries()
 
-        self.test.save_entries()
-        dbManager.cursor.execute("SELECT COUNT(*) FROM entries")
-        c = dbManager.cursor.fetchone()
-        assert(count == c[0])
-        dbManager.cursor.close()
+        latest = db.search_recent_updated(9, 99)
 
+        db.connect_db()
+        db.cursor.execute("SELECT COUNT(*) FROM entries WHERE user_id = 99 AND feed_id = 9;")
+        result = db.cursor.fetchone()
+        db.close_db()
+        count = result[0]
 
-class TestDbManager(unittest.TestCase):
-    def setUp(self):
-        self.test = dbmanager.DbManager('test')
-        self.test.connect_db()
+        assert(count > 1)
 
-    def test_connect_db(self):
-        assert(self.test.conn is not None)
-        assert(self.test.cursor is not None)
+        sc.save_entries()
+
+        latest2 = db.search_recent_updated(9, 99)
+
+        db.connect_db()
+        db.cursor.execute("SELECT COUNT(*) FROM entries WHERE user_id = 99 AND feed_id = 9;")
+        result = db.cursor.fetchone()
+        db.close_db()
+        count2 = result[0]
+
+        # The number of articles should not change
+        # unless the latest update date is chaged.
+        assert(count == count2 or (count < count2 and latest < latest2))
+
+        db.execute_query('DELETE FROM entries;')
+        db.execute_query('DELETE FROM feeds;')
 
 
 if __name__ == "__main__":

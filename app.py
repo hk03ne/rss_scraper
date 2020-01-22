@@ -71,12 +71,6 @@ def login():
     return 'Incorrect email or password.'
 
 
-@app.route('/protected')
-@flask_login.login_required
-def protected():
-    return 'Logged in as: ' + flask_login.current_user.id
-
-
 @app.route('/logout')
 def logout():
     flask_login.logout_user()

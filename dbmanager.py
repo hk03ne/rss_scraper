@@ -10,13 +10,7 @@ def parse_date(date):
 
 class DbManager:
     def __init__(self, mode):
-        if mode == 'test':
-            self.dbName = os.environ.get('DATABASE_URL2')
-        elif mode == 'production':
-            self.dbName = os.environ.get('DATABASE_URL')
-        else:
-            # TODO
-            pass
+        self.dbName = os.environ.get('DATABASE_URL')
         self.conn = None
         self.cursor = None
 

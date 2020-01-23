@@ -1,4 +1,6 @@
 import html
+import datetime
+
 import feedparser
 from bs4 import BeautifulSoup
 
@@ -47,6 +49,11 @@ class RssScraper:
 
         return count
 
+    def delete_old_entries(self):
+        minDatetime = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=14)
+
+        self.dbManager.execute_query('DELETE FROM entries WHERE updated < %s', minDatetime.isoformat(timespec='seconds'))
 
 if __name__ == '__main__':
     RssScraper('production').save_entries()
+    RssScraper('production').delete_old_entries()

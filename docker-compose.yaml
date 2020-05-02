@@ -1,7 +1,7 @@
 version: '3'
 services:
-  my-db:
-    build: .
+  db:
+    build: ./db
     ports:
       - 5432:5432
     environment:
@@ -9,4 +9,23 @@ services:
       POSTGRES_USER: testuser
       POSTGRES_PASSWORD: testpass
     volumes:
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    ports:
+      - 5000:5000
+    links:
+      - db
+    environment:
+      DATABASE_URL: postgresql://testuser:testpass@db:5432/testdb
+    restart: unless-stopped
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    links:
+      - web
+    restart: unless-stopped

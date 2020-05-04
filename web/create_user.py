@@ -11,7 +11,7 @@ from hashlib import sha256
 
 import dbmanager
 
-dbman = dbmanager.DbManager('production')
+dbman = dbmanager.DbManager()
 
 username = input('username: ')
 password = input('password: ')

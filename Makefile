@@ -1,12 +1,12 @@
-init:
-	pip3 install -r requirements.txt
-	psql --dbname=testdb < schema.sql
-	psql --dbname=productiondb < schema.sql
-test:
-	python3 -m unittest discover
+update:
+	git pull
+	sudo docker-compose down
+	sudo docker-compose build
+	sudo docker-compose up -d
+
+user:
+	sudo docker-compose exec web python create_user.py
+
+login-psql:
+	sudo docker-compose exec db psql -U testuser -d testdb
 	
-reinit:
-	psql --dbname=productiondb < scripts/drop.sql
-	psql --dbname=testdb < scripts/drop.sql
-	psql --dbname=productiondb < schema.sql
-	psql --dbname=testdb < schema.sql

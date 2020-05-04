@@ -3,7 +3,7 @@
 収集されたエントリの表示、およびフィードの登録・編集・削除を行う
 """
 import os
-from hashlib import sha256
+import hashlib
 import psycopg2
 
 from flask import (
@@ -54,7 +54,8 @@ def get_user(name):
         users.append(
             dict(
                 id=row[0],
-                password_digest=row[2]))
+                password_digest=row[2],
+                salt=row[3]))
 
     if users == []:
         return None
@@ -82,11 +83,11 @@ def login():
     if user is None:
         return 'Incorrect name or password.'
 
-    hash = sha256(request.form['password'].encode()).hexdigest()
+    digest = hashlib.pbkdf2_hmac('sha256', request.form['password'].encode(), bytes.fromhex(user['salt']), 100000).hex()
 
     id = user['id']
 
-    if hash == user['password_digest']:
+    if digest == user['password_digest']:
         user = User()
         user.id = id
         flask_login.login_user(user)

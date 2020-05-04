@@ -7,7 +7,8 @@ Example
 python3 create_user.py
 """
 
-from hashlib import sha256
+import os
+import hashlib
 from getpass import getpass
 
 import dbmanager
@@ -17,13 +18,11 @@ dbman = dbmanager.DbManager()
 username = input('username: ')
 password = getpass('password: ')
 
-sha256 = sha256()
-sha256.update(password.encode())
-
-digest = sha256.hexdigest()
+salt = os.urandom(32)
+digest = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000).hex()
 
 query = 'INSERT INTO users '\
-        '(name, password_digest) '\
-        'VALUES (%s, %s)'
+        '(name, password_digest, salt) '\
+        'VALUES (%s, %s, %s)'
 
-dbman.execute_query(query, username, digest)
+dbman.execute_query(query, username, digest, salt.hex())

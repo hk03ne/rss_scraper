@@ -18,6 +18,7 @@ CREATE TABLE users (
     id              SERIAL       NOT NULL,
     name            varchar(100) UNIQUE,
     password_digest varchar(100) NOT NULL,
+    salt            varchar(100) NOT NULL,
     PRIMARY KEY (id));
 
 CREATE VIEW view_entries AS

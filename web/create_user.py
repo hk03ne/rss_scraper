@@ -8,13 +8,14 @@ python3 create_user.py
 """
 
 from hashlib import sha256
+from getpass import getpass
 
 import dbmanager
 
 dbman = dbmanager.DbManager()
 
 username = input('username: ')
-password = input('password: ')
+password = getpass('password: ')
 
 sha256 = sha256()
 sha256.update(password.encode())

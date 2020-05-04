@@ -10,13 +10,13 @@ import dbmanager
 
 
 class RssScraper:
-    def __init__(self, mode):
+    def __init__(self):
         """
         初期化処理
 
         DBと接続する
         """
-        self.dbManager = dbmanager.DbManager(mode)
+        self.dbManager = dbmanager.DbManager(oe)
 
     def save_entries(self):
         """

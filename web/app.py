@@ -214,7 +214,7 @@ def update_entries():
     """
     エントリを更新する
     """
-    scraper = RssScraper('production')
+    scraper = RssScraper()
     scraper.save_entries()
     return redirect(url_for('index'))
 

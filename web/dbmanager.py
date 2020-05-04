@@ -12,7 +12,7 @@ def parse_date(date):
 
 
 class DbManager:
-    def __init__(self, mode):
+    def __init__(self):
         """
         初期化処理
         """

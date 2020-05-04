@@ -16,7 +16,7 @@ CREATE TABLE feeds (
 
 CREATE TABLE users (
     id              SERIAL       NOT NULL,
-    anem            varchar(100) UNIQUE,
+    name            varchar(100) UNIQUE,
     password_digest varchar(100) NOT NULL,
     PRIMARY KEY (id));
 

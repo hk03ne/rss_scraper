@@ -16,7 +16,7 @@ class RssScraper:
 
         DBと接続する
         """
-        self.dbManager = dbmanager.DbManager(oe)
+        self.dbManager = dbmanager.DbManager()
 
     def save_entries(self):
         """

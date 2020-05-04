@@ -27,13 +27,13 @@ class RssScraper:
         count : int
             収集したエントリ数
         """
-        sites = self.dbManager.get_feed_list()
+        feeds = self.dbManager.get_feed_list()
         count = 0
 
-        for site in sites:
-            feedId = site['id']
-            userId = site['user_id']
-            feedUrl = site['feedUrl']
+        for feed in feeds:
+            feedId = feed['id']
+            userId = feed['user_id']
+            feedUrl = feed['feedUrl']
 
             recentUpdated = self.dbManager.search_recent_updated(feedId, userId)
 

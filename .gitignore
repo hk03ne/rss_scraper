@@ -4,3 +4,4 @@ tool/*
 scripts/backup.sql
 scripts/insert_users.sql
 scripts/gethash.py
+.vscode

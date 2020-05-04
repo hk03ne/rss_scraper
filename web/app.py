@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+収集されたエントリの表示、およびフィードの登録・編集・削除を行う
+"""
 import os
 from hashlib import sha256
 import psycopg2
@@ -28,6 +32,18 @@ app.config.from_object(__name__)
 
 
 def get_user(mail):
+    """
+    ユーザの情報を取得する
+
+    Parameters
+    ----------
+    mail : str
+        対象のユーザのメールアドレス、またはユーザ名
+
+    Returns
+    -------
+    取得したユーザ情報
+    """
     query = 'select * from users where mail = \'{}\''.format(mail)
 
     cursor = g.db.cursor()
@@ -48,6 +64,14 @@ def get_user(mail):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    ログイン画面の表示、およびログインを行う
+
+    GETメソッドでアクセスされた場合、ログイン画面を表示する
+
+    POSTメソッドでアクセスされた場合、メールアドレス（またはユーザ名）と
+    パスワードをチェックし、登録済みのユーザであればトップページにリダイレクトする
+    """
     if request.method == 'GET':
         return render_template('login.html')
 
@@ -90,10 +114,28 @@ def user_loader(id):
 
 
 def connect_db():
+    """
+    DBに接続する
+
+    Returns
+    -------
+    DBとの接続情報
+    """
     return psycopg2.connect(app.config['DATABASE'])
 
-
 def select_entries(where=''):
+    """
+    エントリを取得する
+
+    Parameters
+    ----------
+    where : str
+        エントリの検索条件
+
+    Returns
+    -------
+    取得したエントリのリスト
+    """
     query = 'select * from view_entries ' + where + ' order by updated desc'
     cursor = g.db.cursor()
     cursor.execute(query)
@@ -115,6 +157,18 @@ def select_entries(where=''):
 
 
 def select_feeds(where=''):
+    """
+    フィードを取得する
+
+    Parameters
+    ----------
+    where : str
+        フィードの検索条件
+
+    Returns
+    -------
+    取得したフィードのリスト
+    """
     query = 'select * from feeds ' + where + ' order by id'
     print(query)
     cursor = g.db.cursor()
@@ -146,6 +200,9 @@ def after_request(response):
 @app.route('/')
 @flask_login.login_required
 def index():
+    """
+    トップページを表示する
+    """
     entries = select_entries('where user_id = {}'.format(flask_login.current_user.id))
 
     return render_template('show_entries.html', entries=entries)
@@ -154,6 +211,9 @@ def index():
 @app.route('/update')
 @flask_login.login_required
 def update_entries():
+    """
+    エントリを更新する
+    """
     scraper = RssScraper('production')
     scraper.save_entries()
     return redirect(url_for('index'))
@@ -168,6 +228,11 @@ def show_test_page():
 @app.route('/search')
 @flask_login.login_required
 def search_entries():
+    """
+    エントリを検索する
+
+    指定した文字列をタイトルまたはサマリに含むエントリを検索し、表示する
+    """
     where = 'where user_id = {} and entry_title like \'%{}%\' or summary like \'%{}%\''.format(
         flask_login.current_user.id, request.args['text'], request.args['text'])
 
@@ -179,6 +244,14 @@ def search_entries():
 @app.route('/feeds/<int:post_id>', methods=["GET", "POST"])
 @flask_login.login_required
 def edit_feed(post_id):
+    """
+    フィードを編集する
+
+    GETメソッドでアクセスされた場合、フィードの情報を表示する
+
+    POSTメソッドでアクセスされた場合、フィードの更新または削除を行う
+    （更新か削除かはformから受け取った"action"の値で判定する）
+    """
     if request.method == "GET":
         feeds = select_feeds('where user_id = {} and id = {}'.format(flask_login.current_user.id, post_id))
 
@@ -216,6 +289,9 @@ def edit_feed(post_id):
 @app.route('/feeds')
 @flask_login.login_required
 def manage_feeds():
+    """
+    フィード管理画面を表示する
+    """
     feeds = select_feeds('where user_id = {}'.format(flask_login.current_user.id))
 
     return render_template('feeds.html', feeds=feeds)
@@ -224,6 +300,9 @@ def manage_feeds():
 @app.route('/feeds/add', methods=["GET", "POST"])
 @flask_login.login_required
 def add_feeds():
+    """
+    フィードを追加する
+    """
     if request.method == "GET":
         return render_template('add_feed.html')
     else:

@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+フィードからエントリを収集する
+"""
 import html
 import feedparser
 from bs4 import BeautifulSoup
@@ -7,9 +11,22 @@ import dbmanager
 
 class RssScraper:
     def __init__(self, mode):
+        """
+        初期化処理
+
+        DBと接続する
+        """
         self.dbManager = dbmanager.DbManager(mode)
 
     def save_entries(self):
+        """
+        エントリを収集する
+
+        Returns
+        -------
+        count : int
+            収集したエントリ数
+        """
         sites = self.dbManager.get_feed_list()
         count = 0
 

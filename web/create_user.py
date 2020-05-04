@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+ユーザを追加するツール
+
+Example
+-------
+python3 create_user.py
+"""
+
 from hashlib import sha256
 
 import dbmanager

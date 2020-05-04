@@ -31,20 +31,20 @@ login_manager.init_app(app)
 app.config.from_object(__name__)
 
 
-def get_user(mail):
+def get_user(name):
     """
     ユーザの情報を取得する
 
     Parameters
     ----------
-    mail : str
-        対象のユーザのメールアドレス、またはユーザ名
+    name : str
+        対象のユーザ名
 
     Returns
     -------
     取得したユーザ情報
     """
-    query = 'select * from users where mail = \'{}\''.format(mail)
+    query = 'select * from users where mail = \'{}\''.format(name)
 
     cursor = g.db.cursor()
     cursor.execute(query)
@@ -69,18 +69,18 @@ def login():
 
     GETメソッドでアクセスされた場合、ログイン画面を表示する
 
-    POSTメソッドでアクセスされた場合、メールアドレス（またはユーザ名）と
-    パスワードをチェックし、登録済みのユーザであればトップページにリダイレクトする
+    POSTメソッドでアクセスされた場合、ユーザ名とパスワードをチェックし、
+    登録済みのユーザであればトップページにリダイレクトする
     """
     if request.method == 'GET':
         return render_template('login.html')
 
-    if request.form['email'] == '' or request.form['password'] == '':
-        return 'Input email and password.'
+    if request.form['name'] == '' or request.form['password'] == '':
+        return 'Input name and password.'
 
-    user = get_user(request.form['email'])
+    user = get_user(request.form['name'])
     if user is None:
-        return 'Incorrect email or password.'
+        return 'Incorrect name or password.'
 
     hash = sha256(request.form['password'].encode()).hexdigest()
 
@@ -92,7 +92,7 @@ def login():
         flask_login.login_user(user)
         return redirect(url_for('index'))
 
-    return 'Incorrect email or password.'
+    return 'Incorrect name or password.'
 
 
 @app.route('/logout')

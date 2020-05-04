@@ -20,7 +20,7 @@ SET row_security = off;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: testuser
 --
 
-COPY public.users (id, mail, password_digest) FROM stdin;
+COPY public.users (id, name, password_digest) FROM stdin;
 1	test	94ee059335e587e501cc4bf90613e0814f00a7b08bc7c648fd865a2af6a22cc2
 \.
 

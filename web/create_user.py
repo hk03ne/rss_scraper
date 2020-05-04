@@ -22,7 +22,7 @@ sha256.update(password.encode())
 digest = sha256.hexdigest()
 
 query = 'INSERT INTO users '\
-        '(mail, password_digest) '\
+        '(name, password_digest) '\
         'VALUES (%s, %s)'
 
 dbman.execute_query(query, username, digest)

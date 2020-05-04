@@ -44,7 +44,7 @@ def get_user(name):
     -------
     取得したユーザ情報
     """
-    query = 'select * from users where mail = \'{}\''.format(name)
+    query = 'select * from users where name = \'{}\''.format(name)
 
     cursor = g.db.cursor()
     cursor.execute(query)

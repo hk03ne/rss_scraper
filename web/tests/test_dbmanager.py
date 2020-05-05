@@ -11,20 +11,19 @@ class TestDbManager(unittest.TestCase):
         pass
 
     def test_connect_db(self):
-        db = dbmanager.DbManager('test')
+        db = dbmanager.DbManager()
         db.connect_db()
         assert(db.conn.closed == 0)
         db.close_db()
 
     def test_close_db(self):
-        db = dbmanager.DbManager('test')
+        db = dbmanager.DbManager()
         db.connect_db()
         db.close_db()
         assert(db.conn.closed != 0)
 
     def test_get_feed_list(self):
-        db = dbmanager.DbManager('test')
-        conn = db.connect_db()
+        db = dbmanager.DbManager()
         db.execute_query('DELETE FROM feeds;')
         db.execute_query('INSERT INTO feeds (id, user_id, site_title, site_url, feed_url) VALUES (1, 2, \'site_title\', \'site_url\', \'feed_url\');')
         feeds = db.get_feed_list()
@@ -34,11 +33,9 @@ class TestDbManager(unittest.TestCase):
         assert(feeds[0]['siteUrl'] == 'site_url')
         assert(feeds[0]['feedUrl'] == 'feed_url')
         db.execute_query('DELETE FROM feeds;')
-        db.close_db()
 
     def test_search_recent_updated(self):
-        db = dbmanager.DbManager('test')
-        conn = db.connect_db()
+        db = dbmanager.DbManager()
         db.execute_query('DELETE FROM entries;')
         db.execute_query('INSERT INTO entries (user_id, feed_id, entry_title, entry_url, summary, updated) VALUES (3, 3, \'entry_title\', \'entry_url\', \'summary\', \'2020-01-01 09:00:00\');')
         db.execute_query('INSERT INTO entries (user_id, feed_id, entry_title, entry_url, summary, updated) VALUES (3, 3, \'entry_title\', \'entry_url\', \'summary\', \'2020-01-02 03:01:01\');')
@@ -46,7 +43,6 @@ class TestDbManager(unittest.TestCase):
         date = db.search_recent_updated(3,3)
         assert(date == '2020-01-02T03:01:01')
         db.execute_query('DELETE FROM entries;')
-        db.close_db()
 
 
 if __name__ == "__main__":

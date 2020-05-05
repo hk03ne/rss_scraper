@@ -12,7 +12,7 @@ class TestRssScraper(unittest.TestCase):
         pass
 
     def test_save_entries(self):
-        sc = scraper.RssScraper('test')
+        sc = scraper.RssScraper()
         db = sc.dbManager
 
         db.execute_query('DELETE FROM entries;')

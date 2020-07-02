@@ -206,7 +206,7 @@ def index():
     """
     entries = select_entries('where user_id = {}'.format(flask_login.current_user.id))
 
-    return render_template('show_entries.html', entries=entries)
+    return render_template('entries.html', entries=entries)
 
 
 @app.route('/update')
@@ -239,7 +239,7 @@ def search_entries():
 
     entries = select_entries(where)
 
-    return render_template('show_entries.html', entries=entries)
+    return render_template('entries.html', entries=entries)
 
 
 @app.route('/feeds/<int:post_id>', methods=["GET", "POST"])

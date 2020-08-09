@@ -171,7 +171,6 @@ def select_feeds(where=''):
     取得したフィードのリスト
     """
     query = 'select * from feeds ' + where + ' order by id'
-    print(query)
     cursor = g.db.cursor()
     cursor.execute(query)
 
